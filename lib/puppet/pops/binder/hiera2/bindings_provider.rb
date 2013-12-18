@@ -61,7 +61,7 @@ module Puppet::Pops::Binder::Hiera2
               expr = build_expr(value, hiera_data_file_path)
               if is_constant?(expr)
                 # The value is constant so toss the expression
-                b.type(@type_calculator.infer(value)).to(value)
+                b.type(@type_calculator.infer_generic(value)).to(value)
               else
                 # Use an evaluating producer for the binding
                 b.to(expr)
@@ -108,8 +108,12 @@ module Puppet::Pops::Binder::Hiera2
         end
       when Enumerable
         value.inject(Model::LiteralList.new) {|a,v| a.addValues(build_expr(v, hiera_data_file_path)); a }
-      when Numeric
-        expr = Model::LiteralNumber.new
+      when Integer
+        expr = Model::LiteralInteger.new
+        expr.value = value;
+        expr
+      when Float
+        expr = Model::LiteralFloat.new
         expr.value = value;
         expr
       when TrueClass, FalseClass

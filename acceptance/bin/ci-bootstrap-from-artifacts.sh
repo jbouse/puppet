@@ -13,6 +13,7 @@
 set -x
 
 echo "SHA: ${SHA}"
+echo "FORK: ${FORK}"
 echo "BUILD_SELECTOR: ${BUILD_SELECTOR}"
 echo "PACKAGE_BUILD_STATUS: ${PACKAGE_BUILD_STATUS}"
 
@@ -24,8 +25,11 @@ tar -xzvf ../acceptance-artifacts.tar.gz
 echo "===== This artifact is from ====="
 cat creator.txt
 
-cd config/el6
 bundle install --without=development --path=.bundle/gems
+
+if [[ "${platform}" =~ 'solaris' ]]; then
+  repo_proxy="  :repo_proxy => false,"
+fi
 
 cat > local_options.rb <<-EOF
 {
@@ -33,6 +37,7 @@ cat > local_options.rb <<-EOF
   :ssh => {
     :keys => ["${HOME}/.ssh/id_rsa-old.private"],
   },
+${repo_proxy}
 }
 EOF
 
